@@ -103,7 +103,7 @@ components.playerCast = function(entity)
 		},
 		convert = {
 			cd = {
-				cur = 0
+				cur = 0,
 				max = 10
 			},
 			cost = 50,

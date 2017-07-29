@@ -246,23 +246,28 @@ systems.drawSystems = {
 			local w = 0
 			local h = 0
 			if e.dimensions then w = e.dimensions.w; h = e.dimensions.h end
+			if e.enemy == false then -- converted mob
+				g.setColor(255, 255, 255, 50)
+			else
+				g.setColor(255, 255, 255)
+			end
 			g.draw(e.drawable, e.position.x, e.position.y, r, 1, 1, w/2, h/2)
 		end
 
-		if e.damageCircle then
+		--[[if e.damageCircle then
 			g.setColor(100, 100, 100)
 			g.circle("line", e.position.x, e.position.y, e.damageCircle)
 			g.setColor(255, 255, 255)
-		end
+		end]]--
 	end
 }
 
 systems.uiSystems = {
-	function(e, bhDown)
+	function(e)
 		if e.health and e.showHealth and e.position and e.dimensions then
-			g.setColor(200, 0, 0, 100)
+			g.setColor(200, 0, 0)
 			g.rectangle("fill", e.position.x - e.dimensions.w/2, e.position.y - e.dimensions.h/2, e.dimensions.w, 5)
-			g.setColor(0, 200, 0, 100)
+			g.setColor(0, 200, 0)
 			g.rectangle("fill", e.position.x - e.dimensions.w/2, e.position.y - e.dimensions.h/2, e.dimensions.w*(e.health.cur/e.health.max), 5)
 		end
 

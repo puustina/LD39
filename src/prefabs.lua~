@@ -6,6 +6,9 @@ local wImage = g.newImage("assets/wizard.png")
 local pImage = g.newImage("assets/peasant.png")
 local kImage = g.newImage("assets/knight.png")
 local bImage = g.newImage("assets/dragon.png")
+local bulletImage = g.newImage("assets/orb.png")
+local convImage = g.newImage("assets/cloud.png")
+local suckImage = g.newImage("assets/pool.png")
 
 prefabs.player = function(x, y)
 	local p = {}
@@ -81,7 +84,7 @@ prefabs.bloodBullet = function(x, y)
 	local bb = {}
 	components.position(bb, x, y)
 	components.movementDirection(bb, 0, 0)
-	components.drawable(bb, nil)
+	components.drawable(bb, bulletImage)
 	components.speed(bb, 400)
 	components.damageCircle(bb, 16)
 	components.hurtEnemyOnTouch(bb, 3)
@@ -93,7 +96,7 @@ end
 prefabs.bloodSuck = function(x, y)
 	local bs = {}
 	components.position(bs, x, y)
-	components.drawable(bs, nil)
+	components.drawable(bs, suckImage)
 	components.damageCircle(bs, 64)
 	components.hurtEnemyOnTouch(bs, 5)
 	components.giveHealthOnTouch(bs, 5)
@@ -104,11 +107,11 @@ end
 prefabs.conversionCircle = function(x, y)
 	local c = {}
 	components.position(c, x, y)
-	components.drawable(c, nil)
+	components.drawable(c, convImage)
 	components.damageCircle(c, 256)
 	components.killAfterDelay(c, 5)
 	components.convertOnDeath(c)
-	components.hurtEnemyOnTouch(c, 5)
+	components.hurtEnemyOnTouch(c, 1)
 	return c
 end
 
