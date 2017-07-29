@@ -9,6 +9,7 @@ local bImage = g.newImage("assets/dragon.png")
 local bulletImage = g.newImage("assets/orb.png")
 local convImage = g.newImage("assets/cloud.png")
 local suckImage = g.newImage("assets/pool.png")
+local fireImage = g.newImage("assets/fire.png")
 
 prefabs.player = function(x, y)
 	local p = {}
@@ -74,11 +75,28 @@ prefabs.boss = function(x, y)
 	components.playerFollowAI(b)
 	components.enterArenaAI(b)
 	components.speed(b, 10)
-	components.health(b, 1000)
+	components.health(b, 500)
 	components.showBigHealth(b, 1, "Dragon")
 	components.damageCircle(b, 64)
 	components.enemy(b)
+	components.hurtPlayerOnTouch(b, 100)
+	components.shootFireAI(b, 5)
 	return b
+end
+
+prefabs.fire = function(x, y)
+	local fire = {}
+	components.position(fire, x, y)
+	components.movementDirection(fire, 0, 0)
+	components.drawable(fire, fireImage)
+	components.speed(fire, 150)
+	components.damageCircle(fire, 32)
+	components.dimensions(fire, 64, 64)
+	components.hurtPlayerOnTouch(fire, 10)
+	components.killIfOutsideRoom(fire)
+	components.stopMovementAfter(fire, 1 + math.random(4))
+	components.killAfterDelay(fire, 5)
+	return fire
 end
 
 prefabs.bloodBullet = function(x, y)

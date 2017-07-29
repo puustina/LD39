@@ -60,7 +60,7 @@ components.mouseLook = function(entity)
 end
 
 components.playerFollowAI = function(entity)
-	entity.playerLook = true
+	entity.playerFollowAI = true
 end
 
 components.chargeAI = function(entity)
@@ -71,6 +71,15 @@ end
 
 components.enterArenaAI = function(entity)
 	entity.enterArenaAI = true
+end
+
+components.shootFireAI = function(entity, cd)
+	entity.shootFireAI = {
+		cd = {
+			cur = 0,
+			max = cd
+		}
+	}
 end
 
 components.playerCast = function(entity)
@@ -163,6 +172,10 @@ end
 
 components.takeConstantDamage = function(entity, value)
 	entity.takeConstantDamage = value
+end
+
+components.stopMovementAfter = function(entity, delay)
+	entity.stopMovementAfter = delay
 end
 
 return components

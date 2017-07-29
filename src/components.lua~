@@ -73,6 +73,15 @@ components.enterArenaAI = function(entity)
 	entity.enterArenaAI = true
 end
 
+components.shootFireAI = function(entity, cd)
+	entity.shootFireAI = {
+		cd = {
+			cur = 0,
+			max = cd
+		}
+	}
+end
+
 components.playerCast = function(entity)
 	entity.playerCast = {
 		bloodBullet = {
@@ -163,6 +172,10 @@ end
 
 components.takeConstantDamage = function(entity, value)
 	entity.takeConstantDamage = value
+end
+
+components.stopMovementAfter = function(entity, delay)
+	entity.stopMovementAfter = delay
 end
 
 return components
