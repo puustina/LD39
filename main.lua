@@ -7,11 +7,12 @@ local bg = love.graphics.newImage("assets/bg.png")
 local timer = 0
 local whatToSpawn = {
 -- time | wavenumber | enemies
-	{0, {15,0,0}},
+	{0, {10,0,0}},
 	{10, {0,5,0}},
-	{15, {40,0,0}},
-	{20, {0,0,1}},
-	{30, {20,0,0}}
+	{20, {20,0,0}},
+	{30, {0,0,1}},
+	{40, {0,5,0}},
+	{50, {10,0,0}}
 }
 local spawnOutsideScreen = function(fun)
 	local wWidth, wHeight = love.window.getMode()
