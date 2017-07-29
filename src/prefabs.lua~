@@ -67,7 +67,7 @@ prefabs.boss = function(x, y)
 	components.dimensions(b, 128, 128)
 	components.rotation(b, 0)
 	components.drawable(b, bImage)
-	--components.bossAI(b)
+	components.playerFollowAI(b)
 	components.enterArenaAI(b)
 	components.speed(b, 10)
 	components.health(b, 1000)
@@ -81,11 +81,10 @@ prefabs.bloodBullet = function(x, y)
 	local bb = {}
 	components.position(bb, x, y)
 	components.movementDirection(bb, 0, 0)
-	--components.dimensions(bb, 16, 16)
 	components.drawable(bb, nil)
 	components.speed(bb, 400)
 	components.damageCircle(bb, 16)
-	components.hurtEnemyOnTouch(bb, 5)
+	components.hurtEnemyOnTouch(bb, 3)
 	components.dieOnCollision(bb)
 	components.killIfOutsideOfRoom(bb)
 	return bb
@@ -96,10 +95,21 @@ prefabs.bloodSuck = function(x, y)
 	components.position(bs, x, y)
 	components.drawable(bs, nil)
 	components.damageCircle(bs, 64)
-	components.hurtEnemyOnTouch(bs, 1)
-	components.giveHealthOnTouch(bs, 1)
-	components.killAfterDelay(bs, 0.5)
+	components.hurtEnemyOnTouch(bs, 5)
+	components.giveHealthOnTouch(bs, 5)
+	components.killAfterDelay(bs, 1)
 	return bs
+end
+
+prefabs.conversionCircle = function(x, y)
+	local c = {}
+	components.position(c, x, y)
+	components.drawable(c, nil)
+	components.damageCircle(c, 256)
+	components.killAfterDelay(c, 5)
+	components.convertOnDeath(c)
+	components.hurtEnemyOnTouch(c, 5)
+	return c
 end
 
 return prefabs

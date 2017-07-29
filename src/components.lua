@@ -59,7 +59,7 @@ components.mouseLook = function(entity)
 	entity.mouseLook = true
 end
 
-components.playerLook = function(entity)
+components.playerFollowAI = function(entity)
 	entity.playerLook = true
 end
 
@@ -80,14 +80,39 @@ components.playerCast = function(entity)
 				cur = 0.0,
 				max = 0.1
 			},
-			cost = 1
+			cost = 1,
+			fireFunc = function()
+				return love.mouse.isDown(1)
+			end,
+			castFunc = function()
+				return 1
+			end
 		},
 		bloodSuck = {
 			cd = {
 				cur = 0.0,
 				max = 0.5
 			},
-			cost = 0
+			cost = 0,
+			fireFunc = function()
+				return love.mouse.isDown(2)
+			end,
+			castFunc = function()
+				return 2
+			end
+		},
+		convert = {
+			cd = {
+				cur = 0,
+				max = 10
+			},
+			cost = 50,
+			fireFunc = function()
+				return love.keyboard.isDown("space")
+			end,
+			castFunc = function()
+				return 3
+			end
 		}
 	}
 end
@@ -130,6 +155,14 @@ end
 
 components.enemy = function(entity)
 	entity.enemy = true
+end
+
+components.convertOnDeath = function(entity)
+	entity.convertOnDeath = true
+end
+
+components.takeConstantDamage = function(entity, value)
+	entity.takeConstantDamage = value
 end
 
 return components

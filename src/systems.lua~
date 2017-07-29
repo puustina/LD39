@@ -5,6 +5,10 @@ local components = require "src.components"
 local prefabs = require "src.prefabs"
 local systems = {}
 
+local collides = function(entA, entB)
+	return math.sqrt(math.pow(entA.position.y - entB.position.y, 2) + math.pow(entA.position.x - entB.position.x, 2)) < entA.damageCircle + entB.damageCircle
+end
+
 systems.systems = {
 	-- mouselook
 	function(e)
@@ -23,7 +27,6 @@ systems.systems = {
 			if k.isDown("s") then e.movementDirection.y = e.movementDirection.y + 1 end
 			if k.isDown("a") then e.movementDirection.x = e.movementDirection.x - 1 end
 			if k.isDown("d") then e.movementDirection.x = e.movementDirection.x + 1 end
-			if k.isDown("space") then e.health.cur = 0 end
 		end
 	end,
 	-- player casting
@@ -33,29 +36,28 @@ systems.systems = {
 			local mX, mY = m.getPosition()
 			local angle = math.atan2(mY - e.position.y, mX - e.position.x)
 			
-			e.playerCast.bloodBullet.cd.cur = e.playerCast.bloodBullet.cd.cur - dt
-
-			if m.isDown(1) and e.playerCast.bloodBullet.cd.cur <= 0 then -- blood bullets
-				local rand = math.random(-0.1, 0.1)
-				entities[#entities + 1] = prefabs.bloodBullet(
-				e.position.x + math.cos(angle + rand) * e.damageCircle, 
-				e.position.y + math.sin(angle + rand) * e.damageCircle)
-				entities[#entities].movementDirection.x = math.cos(angle)
-				entities[#entities].movementDirection.y = math.sin(angle)
-				e.health.cur = e.health.cur - e.playerCast.bloodBullet.cost
-				e.playerCast.bloodBullet.cd.cur = e.playerCast.bloodBullet.cd.max
-			end
-
-			e.playerCast.bloodSuck.cd.cur = e.playerCast.bloodSuck.cd.cur - dt
-
-			if m.isDown(2) and e.playerCast.bloodSuck.cd.cur <= 0 then -- draw out blood
-				entities[#entities + 1] = prefabs.bloodSuck(
-				--e.position.x + math.cos(angle) * e.damageCircle*2,
-				--e.position.y + math.sin(angle) * e.damageCircle*2)
-				mX, mY)
-				e.health.cur = e.health.cur - e.playerCast.bloodSuck.cost    --unify health cost + cd for all skills 
-				e.playerCast.bloodSuck.cd.cur = e.playerCast.bloodSuck.cd.max-- (in code, which means, take it out of this function)
-			end
+			for i, j in pairs(e.playerCast) do
+				j.cd.cur = j.cd.cur - dt
+				if j.fireFunc() and j.cd.cur <= 0 then
+					if j.castFunc() == 1 then -- can't define these in component because of cyclic dependancy
+						local rand = math.random(-0.1, 0.1)
+						entities[#entities + 1] = prefabs.bloodBullet(
+						e.position.x + math.cos(angle + rand) * e.damageCircle, 
+						e.position.y + math.sin(angle + rand) * e.damageCircle)
+						entities[#entities].movementDirection.x = math.cos(angle)
+						entities[#entities].movementDirection.y = math.sin(angle)
+					elseif j.castFunc() == 2 then
+						local dist = math.min(200, math.sqrt(math.pow(mY - e.position.y, 2) + math.pow(mX - e.position.x, 2)))
+						entities[#entities + 1] = prefabs.bloodSuck(
+							e.position.x + math.cos(angle) * dist,
+							e.position.y + math.sin(angle) * dist)
+					elseif j.castFunc() == 3 then
+						entities[#entities + 1] = prefabs.conversionCircle(entities[1].position.x, entities[1].position.y)
+					end
+					e.health.cur = e.health.cur - j.cost
+					j.cd.cur = j.cd.max
+				end
+			end		
 		end
 	end,
 	-- AI
@@ -147,10 +149,6 @@ systems.systems = {
 	end,
 	-- calculate damage
 	function(e, dt, entities)
-		local collides = function(entA, entB)
-			return math.sqrt(math.pow(entA.position.y - entB.position.y, 2) + math.pow(entA.position.x - entB.position.x, 2)) < entA.damageCircle + entB.damageCircle
-		end
-
 		if e.hurtEnemyOnTouch then
 			for i, j in ipairs(entities) do
 				if j.enemy and collides(e, j) then
@@ -166,10 +164,9 @@ systems.systems = {
 							health = health * dt
 						end
 						--hack
-						entities[1].health.cur = math.max(entities[1].health.cur + health, entities[1].health.max)
+						entities[1].health.cur = math.min(entities[1].health.cur + health, entities[1].health.max)
 					end
 					j.health.cur = j.health.cur - damage
-
 				end
 			end
 		end
@@ -187,11 +184,35 @@ systems.systems = {
 				end
 			end
 		end
+
+		if e.takeConstantDamage then
+			e.health.cur = e.health.cur - e.takeConstantDamage * dt
+		end
 	end,
 	-- dying
-	function(e, dt)
-		if e.health then
-			if e.health.cur <= 0 then
+	function(e, dt, entities)
+		if e.health and e.health.cur <= 0 then
+			local converted = false
+			if e.enemy then
+				for i, j in ipairs(entities) do 
+					if j.convertOnDeath and collides(j, e) then
+						e.health.cur = e.health.max
+						e.enemy = false
+						components.player(e)
+						e.playerFollowAI = false
+						e.chargeAI = false
+						components.wandererAI(e)
+						components.hurtEnemyOnTouch(e, e.health.max/10)
+						e.hurtPlayerOnTouch = false
+						e.showHealth = false
+						e.showBigHealth = false
+						components.takeConstantDamage(e, e.health.max/50)
+						converted = true
+						break
+					end
+				end
+			end
+			if not converted then
 				components.dead(e)
 			end
 		end
@@ -237,7 +258,7 @@ systems.drawSystems = {
 }
 
 systems.uiSystems = {
-	function(e)
+	function(e, bhDown)
 		if e.health and e.showHealth and e.position and e.dimensions then
 			g.setColor(200, 0, 0, 100)
 			g.rectangle("fill", e.position.x - e.dimensions.w/2, e.position.y - e.dimensions.h/2, e.dimensions.w, 5)

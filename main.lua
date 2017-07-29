@@ -12,7 +12,7 @@ function love.load()
 	entities[1] = prefabs.player(wWidth/2, wHeight/2)
 
 	local spawnOutsideScreen = function(fun)
-		local angle = math.random(-math.pi, math.pi)
+		local angle = math.random(100*-math.pi, 100*math.pi)
 		local dist = math.sqrt(math.pow(wWidth/2, 2) + math.pow(wHeight/2, 2))
 		entities[#entities + 1] = fun(wWidth/2 + math.cos(angle)*dist, wHeight/2 + math.sin(angle)*dist)
 	end
@@ -30,7 +30,6 @@ function love.update(dt)
 		for k, sys in ipairs(systems.systems) do
 			sys(j, dt, entities)
 		end
-
 	end
 
 	-- death (removal from entity-list)
